@@ -30,7 +30,7 @@ jobs:
 
       - name: Generate static HTML report
         if: always()
-        run: npx playwright show-report --reporter=html
+        run: npx playwright show-report --output=playwright-report
 
       - name: Upload HTML report to GitHub Pages
         if: always()
