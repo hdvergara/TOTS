@@ -1,0 +1,638 @@
+{
+	"info": {
+		"_postman_id": "455c4855-b06f-4ed3-bc91-d610c3225e87",
+		"name": "TOST Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45172316",
+		"_collection_link": "https://automation-8422689.postman.co/workspace/Automation's-Workspace~95284a27-65af-4879-85df-81f1d16b810c/collection/45172316-455c4855-b06f-4ed3-bc91-d610c3225e87?action=share&source=collection_link&creator=45172316"
+	},
+	"item": [
+		{
+			"name": "POST",
+			"item": [
+				{
+					"name": "Testing POST OK",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generar un nombre aleatorio\r",
+									"var randomName = \"Usuario\" + Math.floor(Math.random() * 10000);\r",
+									"pm.environment.set(\"dynamicName\", randomName);\r",
+									"\r",
+									"// Generar un género aleatorio (\"male\" o \"female\" o cualquier otro que tu API acepte)\r",
+									"var genders = [\"male\", \"female\"]; // Define aquí los géneros que tu API espera\r",
+									"var randomGender = genders[Math.floor(Math.random() * genders.length)];\r",
+									"pm.environment.set(\"dynamicGender\", randomGender);\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"if (jsonData && jsonData.id) {\r",
+									"    var capturedId = jsonData.id;\r",
+									"    pm.collectionVariables.set(\"idUser\", capturedId);\r",
+									"    console.log(\"ID capturado y guardado en la variable de colección 'idUser':\", capturedId);\r",
+									"} else {\r",
+									"    console.log(\"No se encontró el 'id' en la respuesta JSON o la respuesta no es un JSON válido.\");\r",
+									"}\r",
+									"\r",
+									"pm.test(\"Status code is 201 OK\", () => {\r",
+									"  pm.expect(pm.response.code).to.eql(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status text is Created\", function () {\r",
+									"    pm.response.to.have.status(\"Created\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"\r",
+									"// Validate Schema\r",
+									"//Se define el Schema a validar:\r",
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\": {\r",
+									"        \"id\": {\r",
+									"            \"type\": \"integer\"\r",
+									"        },\r",
+									"        \"name\": {\r",
+									"            \"type\": \"string\"\r",
+									"        },\r",
+									"        \"email\": {\r",
+									"            \"type\": \"string\",\r",
+									"            \"format\": \"email\"\r",
+									"        },\r",
+									"        \"gender\": {\r",
+									"            \"type\": \"string\",\r",
+									"            \"enum\": [\"male\", \"female\"]\r",
+									"        },\r",
+									"        \"status\": {\r",
+									"            \"type\": \"string\",\r",
+									"            \"enum\": [\"active\", \"inactive\"]\r",
+									"        }\r",
+									"    },\r",
+									"    \"required\": [\"id\", \"name\", \"email\", \"gender\", \"status\"],\r",
+									"    \"additionalProperties\": false\r",
+									"};\r",
+									"\r",
+									"pm.test(\"Response body matches schema\", function () {\r",
+									"    const validationResult = tv4.validate(jsonData, schema);\r",
+									"    pm.expect(validationResult).to.be.true;\r",
+									"\r",
+									"    // error más específico si falla\r",
+									"    if (!validationResult) {\r",
+									"        console.error(\"Schema validation failed:\", tv4.error);\r",
+									"        // Puedes lanzar un error explícito si prefieres que la prueba se muestre como fallida\r",
+									"        throw new Error(\"Schema validation failed: \" + tv4.error.message);\r",
+									"    }\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer ACCESS-TOKEN"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{$randomFullName}}\",\r\n    \"gender\": \"{{dynamicGender}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://gorest.co.in/public/v2/users?access-token={{token}}",
+							"protocol": "https",
+							"host": [
+								"gorest",
+								"co",
+								"in"
+							],
+							"path": [
+								"public",
+								"v2",
+								"users"
+							],
+							"query": [
+								{
+									"key": "access-token",
+									"value": "{{token}}"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -i -H \"Accept:application/json\" -H \"Content-Type:application/json\" -H \"Authorization: Bearer ACCESS-TOKEN\" -XPOST \"https://gorest.co.in/public/v2/users\" -d '{\"name\":\"Tenali Ramakrishna\", \"gender\":\"male\", \"email\":\"tenali.ramakrishna@15ce.com\", \"status\":\"active\"}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Testing POST ERROR",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generar un nombre aleatorio\r",
+									"var randomName = \"Usuario\" + Math.floor(Math.random() * 10000);\r",
+									"pm.environment.set(\"dynamicName\", randomName);\r",
+									"\r",
+									"// Generar un género aleatorio (\"male\" o \"female\" o cualquier otro que tu API acepte)\r",
+									"var genders = [\"male\", \"female\"]; // Define aquí los géneros que tu API espera\r",
+									"var randomGender = genders[Math.floor(Math.random() * genders.length)];\r",
+									"pm.environment.set(\"dynamicGender\", randomGender);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer ACCESS-TOKEN",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{$randomFullName}}\",\r\n    \"gender\": \"{{dynamicGender}}\",\r\n    \"email\": \"{{$randomEmail}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://gorest.co.in/public/v2/users?access-token={{token}}",
+							"protocol": "https",
+							"host": [
+								"gorest",
+								"co",
+								"in"
+							],
+							"path": [
+								"public",
+								"v2",
+								"users"
+							],
+							"query": [
+								{
+									"key": "access-token",
+									"value": "{{token}}"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -i -H \"Accept:application/json\" -H \"Content-Type:application/json\" -H \"Authorization: Bearer ACCESS-TOKEN\" -XPOST \"https://gorest.co.in/public/v2/users\" -d '{\"name\":\"Tenali Ramakrishna\", \"gender\":\"male\", \"email\":\"tenali.ramakrishna@15ce.com\", \"status\":\"active\"}'"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GET",
+			"item": [
+				{
+					"name": "Get Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://gorest.co.in/public/v2/users",
+							"protocol": "https",
+							"host": [
+								"gorest",
+								"co",
+								"in"
+							],
+							"path": [
+								"public",
+								"v2",
+								"users"
+							]
+						},
+						"description": "Generated from cURL: curl -i -H \"Accept:application/json\" -H \"Content-Type:application/json\" -H \"Authorization: Bearer 04331e967da767fbd7dc6232a39c11796daeeda9e2fbbd611dea45462636da7d\" -XGET \"https://gorest.co.in/public/v2/users\""
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", () => {\r",
+									"  pm.expect(pm.response.code).to.eql(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status text is OK\", function () {\r",
+									"    pm.response.to.have.status(\"OK\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "https://gorest.co.in/public/v2/users/{{idUser}}",
+							"protocol": "https",
+							"host": [
+								"gorest",
+								"co",
+								"in"
+							],
+							"path": [
+								"public",
+								"v2",
+								"users",
+								"{{idUser}}"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -i -H \"Accept:application/json\" -H \"Content-Type:application/json\" -H \"Authorization: Bearer 04331e967da767fbd7dc6232a39c11796daeeda9e2fbbd611dea45462636da7d\" -XGET \"https://gorest.co.in/public/v2/users\""
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By ID Error",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"pm.test(\"Status code is 404 OK\", () => {\r",
+									"  pm.expect(pm.response.code).to.eql(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status text is Not Found\", function () {\r",
+									"    pm.response.to.have.status(\"Not Found\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "https://gorest.co.in/public/v2/users/{{idUserError}}",
+							"protocol": "https",
+							"host": [
+								"gorest",
+								"co",
+								"in"
+							],
+							"path": [
+								"public",
+								"v2",
+								"users",
+								"{{idUserError}}"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -i -H \"Accept:application/json\" -H \"Content-Type:application/json\" -H \"Authorization: Bearer 04331e967da767fbd7dc6232a39c11796daeeda9e2fbbd611dea45462636da7d\" -XGET \"https://gorest.co.in/public/v2/users\""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PATCH",
+			"item": [
+				{
+					"name": "Update User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", () => {\r",
+									"  pm.expect(pm.response.code).to.eql(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status text is OK\", function () {\r",
+									"    pm.response.to.have.status(\"OK\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{$randomFullName}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://gorest.co.in/public/v2/users/{{idUser}}",
+							"protocol": "https",
+							"host": [
+								"gorest",
+								"co",
+								"in"
+							],
+							"path": [
+								"public",
+								"v2",
+								"users",
+								"{{idUser}}"
+							]
+						},
+						"description": "Generated from cURL: curl -i -H \"Accept:application/json\" -H \"Content-Type:application/json\" -H \"Authorization: Bearer 04331e967da767fbd7dc6232a39c11796daeeda9e2fbbd611dea45462636da7d\" -XPATCH \"https://gorest.co.in/public/v2/users/7439747\" -d '{\"name\":\"Allasani Peddana\", \"email\":\"allasani.peddana@15ce.com\", \"status\":\"active\"}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Error",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 OK\", () => {\r",
+									"  pm.expect(pm.response.code).to.eql(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status text is Not Found\", function () {\r",
+									"    pm.response.to.have.status(\"Not Found\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{$randomFullName}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://gorest.co.in/public/v2/users/{{idUserError}}",
+							"protocol": "https",
+							"host": [
+								"gorest",
+								"co",
+								"in"
+							],
+							"path": [
+								"public",
+								"v2",
+								"users",
+								"{{idUserError}}"
+							]
+						},
+						"description": "Generated from cURL: curl -i -H \"Accept:application/json\" -H \"Content-Type:application/json\" -H \"Authorization: Bearer 04331e967da767fbd7dc6232a39c11796daeeda9e2fbbd611dea45462636da7d\" -XPATCH \"https://gorest.co.in/public/v2/users/7439747\" -d '{\"name\":\"Allasani Peddana\", \"email\":\"allasani.peddana@15ce.com\", \"status\":\"active\"}'"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DELETE",
+			"item": [
+				{
+					"name": "Delete User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 OK\", () => {\r",
+									"  pm.expect(pm.response.code).to.eql(204);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status text is No Content\", function () {\r",
+									"    pm.response.to.have.status(\"No Content\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "https://gorest.co.in/public/v2/users/{{idUser}}",
+							"protocol": "https",
+							"host": [
+								"gorest",
+								"co",
+								"in"
+							],
+							"path": [
+								"public",
+								"v2",
+								"users",
+								"{{idUser}}"
+							]
+						},
+						"description": "Generated from cURL: curl -i -H \"Accept:application/json\" -H \"Content-Type:application/json\" -H \"Authorization: Bearer 04331e967da767fbd7dc6232a39c11796daeeda9e2fbbd611dea45462636da7d\" -XDELETE \"https://gorest.co.in/public/v2/users/7439747\""
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": "04331e967da767fbd7dc6232a39c11796daeeda9e2fbbd611dea45462636da7d",
+			"type": "string"
+		},
+		{
+			"key": "idUser",
+			"value": ""
+		},
+		{
+			"key": "idUserError",
+			"value": "45",
+			"type": "string"
+		}
+	]
+}
